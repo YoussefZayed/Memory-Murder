@@ -1,4 +1,5 @@
 import json
+import time
 
 def set_location(x):
     return x
@@ -10,7 +11,7 @@ def get_big_list(info):
     temp = []
     temp2 =[["Time", "device", "device-id", "event", "guest-id"]]
     for key, value in info.items():
-        temp.append(int(key))
+        temp.append(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(int(key))))
         for v in value.items():
             #print(v[1])
             temp.append(v[1])
