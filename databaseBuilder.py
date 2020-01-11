@@ -42,7 +42,45 @@ class DatabaseBuilder:
             self.cursor.execute(command)
             return "Table created"
 
-
+    def insertTable (self, tableName= "None" , tableRows = []):
+        """
+        inserts into a table with a table name given and each column in it 
+         parameters : String table name
+                      2d Array of row Values and type eg [["time","location"]]
+        return : exit Status
+       """
+        if tableName == "None" or len(tableRows) == 0:
+           return "improper arguments given"
+        else:
+            columnsArray = self.getTableColumns(tableName)
+            columns = ""
+            for column in columnsArray:
+                columns +=   column +","
+            columns = columns[:-1] #gets rid of the extra ,
+            
+            for row in tableRows:
+                command = " INSERT INTO "+ tableName + " (" + columns+" ) VALUES ("
+                values = ""
+                for value in row:
+                    values += "\"" +str(value) + "\" ,"
+                values = values[:-1]
+                command += values + ");"
+                self.cursor.execute(command)
+            return "Table rows inserted"
     
+    def getTableColumns (self, tableName = "None"):
+            """ Grabs Columns from table
+                parameters : String table name
+                return : columns String array
+            
+            """
+            command = """ PRAGMA table_info( """ + tableName + """ );"""
+
+            self.cursor.execute(command)
+            data = self.cursor.fetchall()
+            columns = []
+            for column in data:
+                columns.append(column[1])
+            return(columns)
 
 

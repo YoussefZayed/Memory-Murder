@@ -4,3 +4,4 @@
 from databaseBuilder import DatabaseBuilder
 
 test = DatabaseBuilder()
+test.insertTable("France",[[32,"da"]])
