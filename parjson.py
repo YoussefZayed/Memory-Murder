@@ -1,16 +1,16 @@
 import json
 
+def set_location(x):
+    return x
 
-with open('/Users/dhritiaravind/Desktop/MLH/Cuhacking-2020/dat.json', 'r') as f:
+with open(set_location('/Users/dhritiaravind/Desktop/MLH/Cuhacking-2020/dat.json'), 'r') as f:
     data_dict = json.load(f)
 
-temp_person = []
-
-def get_info(info):
+def get_big_list(info):
     temp = []
-    temp2 =[]
+    temp2 =[["Time", "device", "device-id", "event", "guest-id"]]
     for key, value in info.items():
-         temp.append(key)
+        temp.append(int(key))
         for v in value.items():
             #print(v[1])
             temp.append(v[1])
@@ -18,7 +18,7 @@ def get_info(info):
         temp2.append(temp3) 
         temp.clear()
     return temp2
-print(get_info(data_dict))
+print(get_big_list(data_dict))
 
 
         
