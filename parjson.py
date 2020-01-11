@@ -9,9 +9,10 @@ with open(set_location('/Users/dhritiaravind/Desktop/MLH/Cuhacking-2020/dat.json
 
 def get_big_list(info):
     temp = []
-    temp2 =[["Time", "device", "device-id", "event", "guest-id"]]
+    temp2 =[]
     for key, value in info.items():
-        temp.append(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(int(key))))
+        temp.append(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(
+            int(key))))
         for v in value.items():
             #print(v[1])
             temp.append(v[1])
@@ -19,6 +20,14 @@ def get_big_list(info):
         temp2.append(temp3) 
         temp.clear()
     return temp2
+
+
+def types():
+    [['Time', 'Timestamp'],
+    ['device', 'text'],
+    ['device-id', 'text'],
+    ['event','text']
+    ['guest-id', 'text']]
 print(get_big_list(data_dict))
 
 
