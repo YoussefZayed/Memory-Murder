@@ -4,4 +4,3 @@
 from databaseBuilder import DatabaseBuilder
 
 test = DatabaseBuilder()
-test.deleteTable()

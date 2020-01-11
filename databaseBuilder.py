@@ -37,7 +37,9 @@ class DatabaseBuilder:
             command = " CREATE TABLE " + tableName + "("
             for column in tableColumns:
                 command += column[0] + " " + column[1] +","
+            command = command[:-1] #gets rid of the extra ,
             command += ");"
+            self.cursor.execute(command)
             return "Table created"
 
 
