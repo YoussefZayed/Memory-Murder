@@ -11,9 +11,10 @@ class DatabaseBuilder:
         """
         self.connection = sqlite3.connect(database_name)
         self.cursor = self.connection.cursor()
+        self.currentTable = "None"
 
 
-    def deleteTable(self,tableName= "None"):
+    def deleteTable(self,tableName= self.currentTable):
         """ deletes table if table is specified
             parameters : String Table name
             Returns:  String exit status of function 
@@ -24,7 +25,7 @@ class DatabaseBuilder:
         else:
             return "no table was given"
 
-    def createTable (self, tableName= "None" , tableColumns = []):
+    def createTable (self, tableName= self.currentTable , tableColumns = []):
         """
         Creates a table with a table name given and each column in it 
          parameters : String table name
@@ -42,7 +43,7 @@ class DatabaseBuilder:
             self.cursor.execute(command)
             return "Table created"
 
-    def insertTable (self, tableName= "None" , tableRows = []):
+    def insertTable (self, tableName= self.currentTable , tableRows = []):
         """
         inserts into a table with a table name given and each column in it 
          parameters : String table name
@@ -68,7 +69,7 @@ class DatabaseBuilder:
                 self.cursor.execute(command)
             return "Table rows inserted"
     
-    def getTableColumns (self, tableName = "None"):
+    def getTableColumns (self, tableName = self.currentTable):
             """ Grabs Columns from table
                 parameters : String table name
                 return : columns String array
@@ -82,5 +83,13 @@ class DatabaseBuilder:
             for column in data:
                 columns.append(column[1])
             return(columns)
+
+    # def dataReturnIf (self,column ="None", value = "None", limit = 0,tableName = self.currentTable):
+
+    #         """ This method returns all the rows in the table 
+
+            
+    #         """
+
 
 
