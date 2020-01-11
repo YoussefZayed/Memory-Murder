@@ -26,7 +26,7 @@ def types():
     [['Time', 'Timestamp'],
     ['device', 'text'],
     ['device-id', 'text'],
-    ['event','text']
+    ['event','text'],
     ['guest-id', 'text']]
 print(get_big_list(data_dict))
 
