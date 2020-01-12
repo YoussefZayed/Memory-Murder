@@ -262,7 +262,7 @@ def trigger_event(database,current_time):
                 phone.invoke()
             if phone.color =="red" and ( event[3] == "on hook" ) :
                 phone.invoke()
-            
+        el
             
     
     
