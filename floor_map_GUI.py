@@ -252,6 +252,16 @@ def trigger_event(database,current_time):
                 door.invoke()
         
         elif event[1] == "phone":
+            phone_num = event[2]
+            if phone_num == "reception":
+                phone_num = 101
+            if phone_num != "lobby":
+                phone_num = int(phone_num)
+            phone = phone_pos[(phone_num)]
+            if phone.color =="green" and event[3] == "off hook":
+                phone.invoke()
+            if phone.color =="red" and ( event[3] == "on hook" ) :
+                phone.invoke()
             
             
     
