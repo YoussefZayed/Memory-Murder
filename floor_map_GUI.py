@@ -7,12 +7,11 @@ START_TIME = 1578151801
 END_TIME = 1578236760
 
 window = Tk()
-window.geometry("1100x775")
+window.geometry("1200x800")
 window.resizable(0, 0)
 image = Image.open("floor_plan.png")
 floor_map = ImageTk.PhotoImage(image.resize((750, 775), Image.ANTIALIAS))
 
-# Map Frame
 map_label = Label(window, image=floor_map)
 map_label.photo = floor_map
 map_label.pack(side=LEFT)
@@ -22,13 +21,17 @@ date_var = IntVar()
 date_format = StringVar()
 date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
 
+#Timeline Slider
 timeline = Scale(window, from_=START_TIME, to=END_TIME, variable=date_var, orient=VERTICAL, length=700,
-                 font=("Courier", 10)).pack()
-date_label = Label(window, textvariable=date_format, font=("Courier", 10)).pack()
+                 font=("Courier", 10)).pack(side=LEFT)
+date_label = Label(window, textvariable=date_format, font=("Courier", 10)).pack(side=LEFT)
 
 
 def get_time():
     new_time = time_input.get()
+    print(new_time)
+    epoch_time = int(time.mktime(time.strptime("20" + new_time, "%Y.%m.%d %HH:%MM:%SS")))
+    print(epoch_time)
 
 input_label = Label(window, text="Input a desired time (HH:MM:SS)").pack()
 time_input = Entry(window)
@@ -36,7 +39,6 @@ time_button = Button(window, text="Set", command=get_time)
 
 time_input.pack()
 time_button.pack()
-
 
 
 # button object to create toggle buttons
@@ -175,8 +177,8 @@ for key in hotspot_pos:
 
 
 Thomas = Person("Thomas", room_pos[110][0], room_pos[110][1])
-
-play_button = ButtonObject(870, 745, "Play", 20, 30)
+Thomette = Person("Screem", room_pos[156][0], room_pos[156][1])
+play_button = ButtonObject(835, 745, "Play", 20, 30)
 
 
 
@@ -190,6 +192,7 @@ while True:
 
     if date_var.get() == START_TIME + 5:
         Thomas.move(236)
+        Thomette.move(248)
     try:
         window.update()
     except:
