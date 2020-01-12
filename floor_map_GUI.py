@@ -19,26 +19,26 @@ map_label.pack(side=LEFT)
 # Date Slider and Epoch-local conversion
 date_var = IntVar()
 date_format = StringVar()
-date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
 
-#Timeline Slider
+# Timeline Slider
 timeline = Scale(window, from_=START_TIME, to=END_TIME, variable=date_var, orient=VERTICAL, length=700,
                  font=("Courier", 10)).pack(side=LEFT)
 date_label = Label(window, textvariable=date_format, font=("Courier", 10)).pack(side=LEFT)
 
 
-def get_time():
-    new_time = time_input.get()
-    print(new_time)
-    epoch_time = int(time.mktime(time.strptime("20" + new_time, "%Y.%m.%d %HH:%MM:%SS")))
-    print(epoch_time)
-
-input_label = Label(window, text="Input a desired time (HH:MM:SS)").pack()
-time_input = Entry(window)
-time_button = Button(window, text="Set", command=get_time)
-
-time_input.pack()
-time_button.pack()
+# This stuff is for the text input
+# def get_time():
+#     new_time = time_input.get()
+#     print(new_time)
+#     epoch_time = int(time.mktime(time.strptime("20" + new_time, "%Y.%m.%d %HH:%MM:%SS")))
+#     print(epoch_time)
+#
+# input_label = Label(window, text="Input a desired time (HH:MM:SS)").pack()
+# time_input = Entry(window)
+# time_button = Button(window, text="Set", command=get_time)
+#
+# time_input.pack()
+# time_button.pack()
 
 
 # button object to create toggle buttons
@@ -48,11 +48,11 @@ class ButtonObject:
         self.button = Button(window, bg="red", command=self.switch, text=text)
         self.button.place(x=x, y=y, height=h, width=w, in_=window)
 
-    def switch(self):
+    def switch(self):  # Switch button state
         self.check_state()
         self.state = not self.state
 
-    def check_state(self):
+    def check_state(self):  # Changes colour based on button state
         if self.state:
             self.button.config(bg="green")
         else:
@@ -65,18 +65,18 @@ class Person:
         self.state = BooleanVar()
         self.has_label = False
         self.x, self.y = x, y
-        for (k, n) in room_pos.items():
+        for (k, n) in room_pos.items():  # Find person's room based on pixel coordinates
             if (self.x, self.y) == n:
                 self.room = k
         self.name = name
         self.button = Button(window, bg="Blue", command=self.switch, text=name[0])
         self.button.place(x=x, y=y, height=20, width=20, in_=window)
 
-    def switch(self):
+    def switch(self):  # Switch button state
         self.display(self.name, self.room, "AP1-1", "M-210")
         self.state = not self.state
 
-    def display(self, name, room, connection, sensor):
+    def display(self, name, room, connection, sensor):  # Creates a label displaying object's variables
         if self.state:
             self.has_label = True
             text = "Name: " + name + "\nRoom: " + str(room) + "\nWi-Fi: " + connection + "\nTriggered: " + sensor
@@ -85,7 +85,7 @@ class Person:
         else:
             self.display_label.destroy()
 
-    def move(self, new_room=None, new_x=None, new_y=None):
+    def move(self, new_room=None, new_x=None, new_y=None):  # Moves person to a different pixel coord or room
         if new_room is not None:
             new_x, new_y = room_pos[new_room][0], room_pos[new_room][1]
         self.button.place(x=new_x, y=new_y, in_=window)
@@ -161,7 +161,7 @@ room_pos = {
     248: (600, 680)
 
 }
-
+# Most rooms have doors and phones
 phone_pos = door_pos.copy()
 
 # Turn coordinates in dict to toggle buttons
@@ -174,26 +174,28 @@ for key in motion_pos:
 for key in hotspot_pos:
     hotspot_pos[key] = ButtonObject(hotspot_pos[key][0], hotspot_pos[key][1], "W")
 
-
-
+# Test People
 Thomas = Person("Thomas", room_pos[110][0], room_pos[110][1])
 Thomette = Person("Screem", room_pos[156][0], room_pos[156][1])
+
+# Creates the play toggle button
 play_button = ButtonObject(835, 745, "Play", 20, 30)
 
-
-
 # update GUI elements
+# Interfacing with database should probably be done in here, as positions and data
+# can be updated
 while True:
     # Updates the date & time tag and converts from epoch time
     date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
 
+    #Scrubs through timeline when play button is toggled
     if not play_button.state:
         date_var.set(date_var.get() + 5)
 
     if date_var.get() == START_TIME + 5:
-        Thomas.move(236)
-        Thomette.move(248)
+        Thomas.move(236) #Move person to room key
+        Thomette.move(None, 250, 300) #Move person to pixel coord
     try:
-        window.update()
+        window.update() #Update the GUI elements
     except:
         exit(0)
