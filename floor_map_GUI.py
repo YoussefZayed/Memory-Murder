@@ -211,6 +211,8 @@ play_button = ButtonObject(835, 745, "Play", 20, 30)
 while True:
     # Updates the date & time tag and converts from epoch time
     date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
+    database = DatabaseBuilder("data.db","Murder")
+    data_onTime = database.dataReturnIf(["time"],[[date_var.get()]],0,"Murder") 
 
     # Scrubs through timeline when play button is toggled
     if not play_button.state:
