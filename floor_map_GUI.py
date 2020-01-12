@@ -10,6 +10,7 @@ END_TIME = 1578236760
 names = ["Veronica", "Jason", "Thomas", "Rob", "Kristina", "Marc-Andre", "Dave", "Salina", "Harrison", "Alok", "Eugene"]
 
 window = Tk()
+window.title("Richcraft Hotel (Formerly Known as the River Building)")
 window.geometry("1250x800")
 window.resizable(0, 0)
 
@@ -32,25 +33,32 @@ date_format = StringVar()
 slider_frame = Frame(window)
 # Timeline Slider
 timeline = Scale(slider_frame, from_=START_TIME, to=END_TIME, variable=date_var, orient=VERTICAL, length=700,
-                 font=("Courier", 10)).pack(side=LEFT)
-date_label = Label(slider_frame, textvariable=date_format, font=("Courier", 10)).pack(side=LEFT)
+                 font=("Courier", 10)).grid(row=0)
+date_label = Label(slider_frame, textvariable=date_format, font=("Courier", 10)).grid(row=1)
 slider_frame.pack(side=LEFT)
 
 
-check_frame = Frame(window, height=500)
+check_frame = Frame(window, height=500, borderwidth=5, relief="groove", pady=10)
 
 check_vars = []
 checkbuttons = []
-for name in names:
-    c = Checkbutton(check_frame, text=name)
+for x in range(0, 11):
+    check_vars += [IntVar()]
+    c = Checkbutton(check_frame, text=names[x], variable=check_vars[x]) 
     checkbuttons += [c]
-    c.grid()
+    c.grid(pady = 10)
 check_frame.pack()
 
+effect_pause_var = IntVar()
+effect_pause_button = Checkbutton(window, text="Pause for Important Moments", font=("Courier", 10), variable=effect_pause_var)
+effect_pause_button.pack()
+
+run_frame = Frame(window)
 run_speed = IntVar()
-lab = Label(window, text="Run Speed").pack(side=LEFT)
-runtime = Scale(window, from_=1, to=20, variable=run_speed, orient=HORIZONTAL, length=170,
+lab = Label(run_frame, text="Run Speed").pack(side=LEFT)
+runtime = Scale(run_frame, from_=1, to=20, variable=run_speed, orient=HORIZONTAL, length=170,
                  font=("Courier", 10)).pack(side=RIGHT)
+run_frame.pack()
 
 # button object to create toggle buttons
 class ButtonObject:
@@ -220,10 +228,10 @@ for key in ap_pos:
 
 people = {}
 for x in names:
-    people[x[0]] = Person(x, 110)
+    people[x[0]] = Person(x, None, 2000, 2000)
 
 # Creates the play toggle button
-play_button = ButtonObject(835, 745, "Play", 20, 30)
+play_button = ButtonObject(835, 770, "Play", 20, 30)
 
 # update GUI elements
 # Interfacing with database should probably be done in here, as positions and data
@@ -268,27 +276,31 @@ def trigger_event(database,current_time):
             ap = event[2]
             if event[4] != "n/a":
                 people[event[4][0]].move(ap)
-    if event[1] == "phone":
-        phone_num = event[2]
-        if phone_num == "reception":
-            phone_num = 101
-        if phone_num != "lobby":
-            phone_num = int(phone_num)
-        phone = phone_pos[(phone_num)]
-        if phone.color == "green" and event[3] == "off hook":
-            phone.invoke()
-        if phone.color == "red" and (event[3] == "on hook"):
-            phone.invoke()
+        if event[1] == "phone":
+            phone_num = event[2]
+            if phone_num == "reception":
+                phone_num = 101
+            if phone_num != "lobby":
+                phone_num = int(phone_num)
+            phone = phone_pos[(phone_num)]
+            if phone.color == "green" and event[3] == "off hook":
+                phone.invoke()
+            if phone.color == "red" and (event[3] == "on hook"):
+                phone.invoke()
 
-    elif event[1] == "motion sensor":
-        motion_pos[event[2]].invoke()
-        if event[4] != "n/a":
-            people[event[4][0]].set_triggered(event[2])
-        
-        
+        elif event[1] == "motion sensor":
+            motion_pos[event[2]].invoke()
+            if event[4] != "n/a":
+                people[event[4][0]].set_triggered(event[2])
+
+        if event[4] != "n/a" and check_vars[names.index(event[4])].get(): 
+            people[event[4][0]].move(None, 2000, 2000)
+    if database.dataReturnIf(["time"],[[current_time]],0,"Murder") and effect_pause_var.get():
+        play_button.invoke()
 
 previous_time = date_var.get()
 date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
+
 while True:
     # Updates the date & time tag and converts from epoch time
     current_time = date_var.get()
