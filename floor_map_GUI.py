@@ -7,6 +7,7 @@ from databaseBuilder import *
 START_TIME = 1578151801
 END_TIME = 1578236760
 
+
 names = ["Veronica", "Jason", "Thomas", "Rob", "Kristina", "Marc-Andre", "Dave", "Salina", "Harrison", "Alok", "Eugene"]
 
 window = Tk()
@@ -22,6 +23,7 @@ map_label.pack(side=LEFT)
 
 # Date Slider and Epoch-local conversion
 date_var = IntVar()
+run_speed =  DoubleVar()
 date_format = StringVar()
 
 slider_frame = Frame(window)
@@ -55,6 +57,11 @@ for name in names:
     checkbuttons += [c]
     c.grid()
 check_frame.pack()
+
+#run time multiplier
+# Timeline Slider
+runtime = Scale(window, from_=5, to=75, variable=run_speed, orient=HORIZONTAL, length=170,
+                 font=("Courier", 10)).pack(side=RIGHT)
 
 
 # button object to create toggle buttons
@@ -287,6 +294,8 @@ while True:
     # Scrubs through timeline when play button is toggled
     if not play_button.state:
         date_var.set(date_var.get() + 5)
+        
+        time.sleep(1.0/run_speed.get())
 
         # if date_var.get() == START_TIME + 5:
         #     # Thomas.move(236)  # Move person to room key
@@ -296,5 +305,7 @@ while True:
     try:
         
         window.update()  # Update the GUI elements
+        
     except:
+        print(run_speed)
         exit(0)
