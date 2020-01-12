@@ -7,7 +7,6 @@ from databaseBuilder import *
 START_TIME = 1578151801
 END_TIME = 1578236760
 
-
 names = ["Veronica", "Jason", "Thomas", "Rob", "Kristina", "Marc-Andre", "Dave", "Salina", "Harrison", "Alok", "Eugene"]
 
 window = Tk()
@@ -17,13 +16,17 @@ window.resizable(0, 0)
 image = Image.open("floor_plan.png")
 floor_map = ImageTk.PhotoImage(image.resize((750, 775), Image.ANTIALIAS))
 
+
+def show(event):
+    print(event.x, event.y)
 map_label = Label(window, image=floor_map)
 map_label.photo = floor_map
 map_label.pack(side=LEFT)
+map_label.bind("<B1-Motion>", show)
 
 # Date Slider and Epoch-local conversion
 date_var = IntVar()
-run_speed =  DoubleVar()
+
 date_format = StringVar()
 
 slider_frame = Frame(window)
@@ -33,20 +36,6 @@ timeline = Scale(slider_frame, from_=START_TIME, to=END_TIME, variable=date_var,
 date_label = Label(slider_frame, textvariable=date_format, font=("Courier", 10)).pack(side=LEFT)
 slider_frame.pack(side=LEFT)
 
-
-# This stuff is for the text input
-def get_time():
-    new_time = time_input.get()
-    print(new_time)
-    epoch_time = int(time.mktime(time.strptime("20" + new_time, "%Y.%m.%d %HH:%MM:%SS")))
-    print(epoch_time)
-
-
-input_frame = Frame(window, height=200)
-input_label = Label(input_frame, text="Input a desired time (HH:MM:SS)").grid(row=0)
-time_input = Entry(input_frame).grid(row=1)
-time_button = Button(input_frame, text="Set", command=get_time).grid(row=2)
-input_frame.pack(side=TOP)
 
 check_frame = Frame(window, height=500)
 
@@ -58,11 +47,10 @@ for name in names:
     c.grid()
 check_frame.pack()
 
-#run time multiplier
-# Timeline Slider
-runtime = Scale(window, from_=5, to=75, variable=run_speed, orient=HORIZONTAL, length=170,
+run_speed = IntVar()
+lab = Label(window, text="Run Speed").pack(side=LEFT)
+runtime = Scale(window, from_=1, to=20, variable=run_speed, orient=HORIZONTAL, length=170,
                  font=("Courier", 10)).pack(side=RIGHT)
-
 
 # button object to create toggle buttons
 class ButtonObject:
@@ -97,11 +85,15 @@ class Person:
         if room is not None:
             x, y = room_pos[room][0], room_pos[room][1]
         self.x, self.y = x, y
+        self.connection = None
+        self.room = None
         for (k, n) in room_pos.items():  # Find person's room based on pixel coordinates
             if (self.x, self.y) == n:
-                self.room = k
+                if type(k) == int:
+                    self.room = k
+                else:
+                    self.connection = k
         self.name = name
-        self.connection = None
         self.sensor = None
         self.button = Button(window, bg="Blue", command=self.switch, text=name[0])
         self.button.place(x=x, y=y, height=20, width=20, in_=window)
@@ -128,7 +120,14 @@ class Person:
             if self.display_label.winfo_exists():
                 self.display_label.place(x=new_x, y=new_y - 55, in_=window)
         self.x, self.y = new_x, new_y
-        self.room = new_room
+        if type(new_room) == int:
+            self.room = new_room
+        else:
+            self.room = None
+            self.connection = new_room
+
+    def set_triggered(self, area):
+        self.sensor = area
 
 
 # oh no oh god please don't look
@@ -173,8 +172,8 @@ ap_pos = {
 
 # I'm so, so sorry
 room_pos = {
-    110: (175, 180),
     101: (490, 112),
+    110: (175, 180),
     151: (490, 170),
     155: (596, 170),
     130: (175, 355),
@@ -192,8 +191,14 @@ room_pos = {
     232: (250, 700),
     236: (435, 700),
     244: (517, 680),
-    248: (600, 680)
-
+    248: (600, 680),
+    "ap1-1": (180, 245),
+    "ap1-2": (510, 256),
+    "ap1-3": (380, 360),
+    "ap1-4": (340, 190),
+    "ap2-1": (245, 590),
+    "ap2-2": (550, 590),
+    "ap2-3": (425, 590)
 }
 # Most rooms have doors and phones
 phone_pos = door_pos.copy()
@@ -216,7 +221,6 @@ for key in ap_pos:
 people = {}
 for x in names:
     people[x[0]] = Person(x, 110)
-
 
 # Creates the play toggle button
 play_button = ButtonObject(835, 745, "Play", 20, 30)
@@ -243,42 +247,44 @@ def reset():
 def trigger_event(database,current_time):
     """ updates all elements to where they should be right now on  the time line """
     background_data = database.dataReturnIf(['time'],[[START_TIME,current_time]],0,"Murder")
-    # print(background_data)
     reset()
-    
     for event in background_data:
-
-        for key in motion_pos:
-            if motion_pos[key].color == "green":
-                motion_pos[key].invoke()
-
         if event[1] == "door sensor":
             door_num = event[2]
             if event[2] == "156b":
                 door_num = 156.5
             door = door_pos[int(door_num)]
-            if door.color =="green" and event[3] == "door closed":
+            if door.color == "green" and event[3] == "door closed":
                 door.invoke()
-            if door.color =="red" and ( event[3] == "unlocked no keycard" or event[3] == "successful keycard unlock") :
+            if door.color == "red" and ( event[3] == "unlocked no keycard" or event[3] == "successful keycard unlock") :
                 door.invoke()
-        
+                if event[4] != "n/a":
+                    people[event[4][0]].move(int(door_num))
+                    people[event[4][0]].set_triggered(door_num)
         elif event[1] == "phone":
-            phone_num = event[2]
-            if phone_num == "reception":
-                phone_num = 101
-            if phone_num != "lobby":
-                phone_num = int(phone_num)
-            phone = phone_pos[(phone_num)]
-            if phone.color =="green" and event[3] == "off hook":
-                phone.invoke()
-            if phone.color =="red" and ( event[3] == "on hook" ) :
-                phone.invoke()
-        
-        elif event[1] == "motion sensor":
-            motion_pos[event[2]].invoke()
-            
-    
+            pass
 
+        if event[1] == "access point":
+            ap = event[2]
+            if event[4] != "n/a":
+                people[event[4][0]].move(ap)
+    if event[1] == "phone":
+        phone_num = event[2]
+        if phone_num == "reception":
+            phone_num = 101
+        if phone_num != "lobby":
+            phone_num = int(phone_num)
+        phone = phone_pos[(phone_num)]
+        if phone.color == "green" and event[3] == "off hook":
+            phone.invoke()
+        if phone.color == "red" and (event[3] == "on hook"):
+            phone.invoke()
+
+    elif event[1] == "motion sensor":
+        motion_pos[event[2]].invoke()
+        if event[4] != "n/a":
+            people[event[4][0]].set_triggered(event[2])
+        
         
 
 previous_time = date_var.get()
@@ -293,19 +299,10 @@ while True:
     previous_time = date_var.get()
     # Scrubs through timeline when play button is toggled
     if not play_button.state:
-        date_var.set(date_var.get() + 5)
-        
-        time.sleep(1.0/run_speed.get())
+        date_var.set(date_var.get() + run_speed.get())
 
-        # if date_var.get() == START_TIME + 5:
-        #     # Thomas.move(236)  # Move person to room key
-        #     # Thomette.move(None, 250, 300)  # Move person to pixel coord
-        #     # door_pos[236].invoke()
-        #     phone_pos[130].invoke()
     try:
         
         window.update()  # Update the GUI elements
-        
     except:
-        print(run_speed)
         exit(0)
