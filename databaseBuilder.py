@@ -20,7 +20,7 @@ class DatabaseBuilder:
             Returns:  String exit status of function 
         """
         if  not tableName == "None":
-            self.cursor.execute("DROP TABLE "+tableName + ";")
+            self.cursor.execute("DROP TABLE IF EXISTS "+tableName + ";")
             return tableName + " has been deleted!"
         else:
             return "no table was given"
@@ -120,8 +120,15 @@ class DatabaseBuilder:
             return(data)
          
         except EOFError as e:
-            return e
+            return "Improper parameters"
 
+    def seeDatabase (self,tableName = currentTable,limit = 0):
+        # """ returns the entire table """"
+        if limit == 0:
+            self.cursor.execute("SELECT * FROM " + tableName + " ;")
+        else:
+             self.cursor.execute("SELECT * FROM " + tableName + " LIMIT " +str(limit)+ ";")
+        return self.cursor.fetchall()
 
 
 
