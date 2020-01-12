@@ -63,6 +63,7 @@ class ButtonObject:
         self.state = BooleanVar()
         self.button = Button(window, bg="red", command=self.switch, text=text)
         self.button.place(x=x, y=y, height=h, width=w, in_=window)
+        self.color = "red"
 
     def switch(self):  # Switch button state
         self.check_state()
@@ -74,6 +75,10 @@ class ButtonObject:
         else:
             self.button.config(bg="red")
     def invoke(self):
+        if self.color == "red":
+            self.color = "green"
+        else:
+            self.color = "red"
         self.button.invoke()
 
 
@@ -144,10 +149,9 @@ door_pos = {
 }
 
 motion_pos = {
-    200: (349, 633),
-    234: (345, 711),
-    150: (700, 250),
-    250: (700, 590)
+    "elevator": (349, 633),
+    "ice machine": (345, 711),
+    "stairwell": (700, 590)
 }
 
 ap_pos = {
@@ -208,22 +212,68 @@ play_button = ButtonObject(835, 745, "Play", 20, 30)
 # update GUI elements
 # Interfacing with database should probably be done in here, as positions and data
 # can be updated
+
+def reset():
+    for key in door_pos:
+        if phone_pos[key].color == "green":
+            phone_pos[key].invoke()
+        if door_pos[key].color == "green":
+            door_pos[key].invoke()
+    for key in motion_pos:
+        if motion_pos[key].color == "green":
+            motion_pos[key].invoke()
+    for key in ap_pos:
+        if ap_pos[key].color == "green":
+            ap_pos[key].invoke()
+
+
+
+def trigger_event(database,current_time):
+    """ updates all elements to where they should be right now on  the time line """
+    background_data = database.dataReturnIf(['time'],[[START_TIME,current_time]],0,"Murder")
+    # print(background_data)
+    reset()
+    
+    for event in background_data:
+
+        if event[1] == "door sensor":
+            door_num = event[2]
+            if event[2] == "156b":
+                door_num = 156.5
+            door = door_pos[int(door_num)]
+            if 
+            .invoke()
+    
+    
+    # if data[1] == "motion sensor":
+    #     motion_pos[data[2]].invoke()
+
+    # if data[1] == "phone":
+    #     phone_id = data[2]
+        
+        
+
+previous_time = date_var.get()
+date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
 while True:
     # Updates the date & time tag and converts from epoch time
-    date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
-    database = DatabaseBuilder("data.db","Murder")
-    data_onTime = database.dataReturnIf(["time"],[[date_var.get()]],0,"Murder") 
-
+    current_time = date_var.get()
+    if current_time != previous_time:
+        date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
+        database = DatabaseBuilder("data.db","Murder")
+        trigger_event(database,date_var.get())
+    previous_time = date_var.get()
     # Scrubs through timeline when play button is toggled
     if not play_button.state:
         date_var.set(date_var.get() + 5)
 
-    if date_var.get() == START_TIME + 5:
-        Thomas.move(236)  # Move person to room key
-        Thomette.move(None, 250, 300)  # Move person to pixel coord
-        door_pos[236].invoke()
-        phone_pos[130].invoke()
+        # if date_var.get() == START_TIME + 5:
+        #     # Thomas.move(236)  # Move person to room key
+        #     # Thomette.move(None, 250, 300)  # Move person to pixel coord
+        #     # door_pos[236].invoke()
+        #     phone_pos[130].invoke()
     try:
+        
         window.update()  # Update the GUI elements
     except:
         exit(0)
