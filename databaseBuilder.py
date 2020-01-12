@@ -3,8 +3,8 @@
 import sqlite3
 
 class DatabaseBuilder:
-    
-    def __init__ (self, database_name = "data.db"):
+    currentTable = "None"
+    def __init__ (self, database_name = "data.db", currentTable = "None"):
         """ Create a connection to a database  
             parameters : String database name
             Returns: None
@@ -14,7 +14,7 @@ class DatabaseBuilder:
         self.currentTable = "None"
 
 
-    def deleteTable(self,tableName= self.currentTable):
+    def deleteTable(self,tableName= currentTable):
         """ deletes table if table is specified
             parameters : String Table name
             Returns:  String exit status of function 
@@ -24,8 +24,7 @@ class DatabaseBuilder:
             return tableName + " has been deleted!"
         else:
             return "no table was given"
-
-    def createTable (self, tableName= self.currentTable , tableColumns = []):
+    def createTable (self, tableName= currentTable , tableColumns = []):
         """
         Creates a table with a table name given and each column in it 
          parameters : String table name
@@ -43,7 +42,7 @@ class DatabaseBuilder:
             self.cursor.execute(command)
             return "Table created"
 
-    def insertTable (self, tableName= self.currentTable , tableRows = []):
+    def insertTable (self, tableName= currentTable , tableRows = []):
         """
         inserts into a table with a table name given and each column in it 
          parameters : String table name
@@ -69,7 +68,7 @@ class DatabaseBuilder:
                 self.cursor.execute(command)
             return "Table rows inserted"
     
-    def getTableColumns (self, tableName = self.currentTable):
+    def getTableColumns (self, tableName = currentTable):
             """ Grabs Columns from table
                 parameters : String table name
                 return : columns String array
@@ -84,12 +83,41 @@ class DatabaseBuilder:
                 columns.append(column[1])
             return(columns)
 
-    # def dataReturnIf (self,column ="None", value = "None", limit = 0,tableName = self.currentTable):
+    def dataReturnIf (self,columns ="None", values = "None", limit = 0,tableName = currentTable):
 
-    #         """ This method returns all the rows in the table 
-
+        """ This method returns all the rows in the table 
+                where a column matches a value
+                 parameters : column array of columns
+                              value array of limited value
+                              limit of how many items to return
+                              tableName name of the table
+                return : values
+        """
+        # try:
+        command = "Select * From " + tableName+ " "
+       
+        for i in range(0,len(columns)):
+            if i == 0:
+                command += "WHERE "
             
-    #         """
+            if len(values) == 2:
+                command +=  "\"" +columns[i] +"\" BETWEEN \"" + str(values[i][0]) + "\"" + " AND \"" + str(values[i][1]) + "\""
+            else:
+                command +=  "\"" + columns[i] +"\" = \"" + str(values [i] [0]) + "\""
+            command += ","
+        command = command[:-1] 
+        if limit <1:
+            command += ";"
+        else :
+            command += "LIMIT " + limit + ";"
+        self.cursor.execute(command)
+        data = self.cursor.fetchall()
+        return(command, data)
+         
+        # except:
+        #     return #"error"
+
+
 
 
 

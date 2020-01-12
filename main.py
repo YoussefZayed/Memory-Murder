@@ -4,4 +4,4 @@
 from databaseBuilder import DatabaseBuilder
 
 test = DatabaseBuilder()
-test.insertTable("France",[[32,"da"]])
+print(test.dataReturnIf(["NAME"],[["integer"]], 0, "France"))
