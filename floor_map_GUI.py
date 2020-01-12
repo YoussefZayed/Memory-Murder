@@ -241,6 +241,10 @@ def trigger_event(database,current_time):
     
     for event in background_data:
 
+        for key in motion_pos:
+            if motion_pos[key].color == "green":
+                motion_pos[key].invoke()
+
         if event[1] == "door sensor":
             door_num = event[2]
             if event[2] == "156b":
@@ -262,16 +266,12 @@ def trigger_event(database,current_time):
                 phone.invoke()
             if phone.color =="red" and ( event[3] == "on hook" ) :
                 phone.invoke()
-        el
+        
+        elif event[1] == "motion sensor":
+            motion_pos[event[2]].invoke()
             
     
-    
-    # if data[1] == "motion sensor":
-    #     motion_pos[data[2]].invoke()
 
-    # if data[1] == "phone":
-    #     phone_id = data[2]
-        
         
 
 previous_time = date_var.get()
