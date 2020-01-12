@@ -28,7 +28,7 @@ class DatabaseBuilder:
         """
         Creates a table with a table name given and each column in it 
          parameters : String table name
-                      2d Array of column name and type eg [["time","int"]["location","TEXT"]]
+                      2d Array of column name and type eg [["time","int"],["location","TEXT"]]
         return : exit Status
        """
         if tableName == "None" or len(tableColumns) == 0:
@@ -46,7 +46,7 @@ class DatabaseBuilder:
         """
         inserts into a table with a table name given and each column in it 
          parameters : String table name
-                      2d Array of row Values and type eg [["time","location"]]
+                      2d Array of row Values eg [["time","location"]]
         return : exit Status
        """
         if tableName == "None" or len(tableRows) == 0:
@@ -59,13 +59,18 @@ class DatabaseBuilder:
             columns = columns[:-1] #gets rid of the extra ,
             
             for row in tableRows:
-                command = " INSERT INTO "+ tableName + " (" + columns+" ) VALUES ("
+                
+                command = " INSERT INTO `"+ tableName + "` (" + columns+") VALUES ("
                 values = ""
                 for value in row:
-                    values += "\"" +str(value) + "\" ,"
+                    if type(value) is str:
+                        values += "\"" +str(value) + "\","
+                    else:
+                        values += str(value) + ","
                 values = values[:-1]
                 command += values + ");"
                 self.cursor.execute(command)
+            self.connection.commit()
             return "Table rows inserted"
     
     def getTableColumns (self, tableName = currentTable):
@@ -93,29 +98,29 @@ class DatabaseBuilder:
                               tableName name of the table
                 return : values
         """
-        # try:
-        command = "Select * From " + tableName+ " "
-       
-        for i in range(0,len(columns)):
-            if i == 0:
-                command += "WHERE "
-            
-            if len(values) == 2:
-                command +=  "\"" +columns[i] +"\" BETWEEN \"" + str(values[i][0]) + "\"" + " AND \"" + str(values[i][1]) + "\""
-            else:
-                command +=  "\"" + columns[i] +"\" = \"" + str(values [i] [0]) + "\""
-            command += ","
-        command = command[:-1] 
-        if limit <1:
-            command += ";"
-        else :
-            command += "LIMIT " + limit + ";"
-        self.cursor.execute(command)
-        data = self.cursor.fetchall()
-        return(command, data)
+        try:
+            command = "Select * From " + tableName+ " "
+        
+            for i in range(0,len(columns)):
+                if i == 0:
+                    command += "WHERE "
+                
+                if len(values[i]) == 2:
+                    command +=  " "+columns[i]+"   BETWEEN \"" + str(values[i][0]) + "\"" + " AND \"" + str(values[i][1]) + "\""
+                else:
+                    command +=  columns[i]+ " = \'" + str(values [i] [0]) + "\'"
+                command += ","
+            command = command[:-1] 
+            if limit <1:
+                command += ";"
+            else :
+                command += "LIMIT " + str(limit) + ";"
+            self.cursor.execute(command)
+            data = self.cursor.fetchall()
+            return(data)
          
-        # except:
-        #     return #"error"
+        except EOFError as e:
+            return e
 
 
 
