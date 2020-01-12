@@ -7,21 +7,15 @@ START_TIME = 1578151801
 END_TIME = 1578236760
 
 window = Tk()
-window.geometry("1000x775")
+window.geometry("1100x775")
 window.resizable(0, 0)
 image = Image.open("floor_plan.png")
 floor_map = ImageTk.PhotoImage(image.resize((750, 775), Image.ANTIALIAS))
 
-
-def mouse(event):
-    print(event.x, event.y)
-
-
 # Map Frame
-label = Label(window, image=floor_map)
-label.photo = floor_map
-label.pack(side=LEFT)
-label.bind("<B1-Motion>", mouse)
+map_label = Label(window, image=floor_map)
+map_label.photo = floor_map
+map_label.pack(side=LEFT)
 
 # Date Slider and Epoch-local conversion
 date_var = IntVar()
@@ -31,6 +25,18 @@ date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get()
 timeline = Scale(window, from_=START_TIME, to=END_TIME, variable=date_var, orient=VERTICAL, length=700,
                  font=("Courier", 10)).pack()
 date_label = Label(window, textvariable=date_format, font=("Courier", 10)).pack()
+
+
+def get_time():
+    new_time = time_input.get()
+
+input_label = Label(window, text="Input a desired time (HH:MM:SS)").pack()
+time_input = Entry(window)
+time_button = Button(window, text="Set", command=get_time)
+
+time_input.pack()
+time_button.pack()
+
 
 
 # button object to create toggle buttons
@@ -51,34 +57,45 @@ class ButtonObject:
             self.button.config(bg="red")
 
 
+# people object to create people tags
 class Person:
     def __init__(self, name, x, y):
         self.state = BooleanVar()
+        self.has_label = False
         self.x, self.y = x, y
-        self.button = Button(window, bg="Blue", command=self.switch, text=name)
+        for (k, n) in room_pos.items():
+            if (self.x, self.y) == n:
+                self.room = k
+        self.name = name
+        self.button = Button(window, bg="Blue", command=self.switch, text=name[0])
         self.button.place(x=x, y=y, height=20, width=20, in_=window)
 
     def switch(self):
-        self.display("Thomas", 210, "AP1-1", "M-210")
+        self.display(self.name, self.room, "AP1-1", "M-210")
         self.state = not self.state
 
     def display(self, name, room, connection, sensor):
         if self.state:
+            self.has_label = True
             text = "Name: " + name + "\nRoom: " + str(room) + "\nWi-Fi: " + connection + "\nTriggered: " + sensor
             self.display_label = Label(window, text=text, font=('Courier', 7))
-            self.display_label.place(x=self.x, y=self.y-55, in_=window)
+            self.display_label.place(x=self.x, y=self.y - 55, in_=window)
         else:
             self.display_label.destroy()
 
     def move(self, new_room=None, new_x=None, new_y=None):
+        if new_room is not None:
+            new_x, new_y = room_pos[new_room][0], room_pos[new_room][1]
         self.button.place(x=new_x, y=new_y, in_=window)
-        if self.display_label.winfo_exists():
-            self.display_label.place(x=new_x, y=new_y-55, in_=window)
+        if self.has_label:
+            if self.display_label.winfo_exists():
+                self.display_label.place(x=new_x, y=new_y - 55, in_=window)
         self.x, self.y = new_x, new_y
+        self.room = new_room
 
 
-# oh no don't look
-room_pos = {
+# oh no oh god please don't look
+door_pos = {
     101: (445, 117),
     110: (245, 155),
     151: (496, 210),
@@ -118,29 +135,61 @@ hotspot_pos = {
     23: (433, 580)
 }
 
-door_pos = room_pos.copy()
-phone_pos = room_pos.copy()
+# I'm so, so sorry
+room_pos = {
+    110: (175, 180),
+    101: (490, 112),
+    151: (490, 170),
+    155: (596, 170),
+    130: (175, 355),
+    152: (472, 355),
+    154: (546, 355),
+    156: (615, 330),
+    156.5: (615, 375),
+    210: (165, 475),
+    231: (250, 485),
+    233: (345, 485),
+    235: (425, 485),
+    241: (515, 485),
+    247: (605, 485),
+    220: (165, 666),
+    232: (250, 700),
+    236: (435, 700),
+    244: (517, 680),
+    248: (600, 680)
 
-# Turn coorinates in dict to toggle buttons
-for key in room_pos:
-    door_pos[key] = ButtonObject(room_pos[key][0], room_pos[key][1], "D")
-    phone_pos[key] = ButtonObject(room_pos[key][0] - 15, room_pos[key][1], "P")
+}
+
+phone_pos = door_pos.copy()
+
+# Turn coordinates in dict to toggle buttons
+for key in door_pos:
+    phone_pos[key] = ButtonObject(door_pos[key][0] - 15, door_pos[key][1], "P")
+    door_pos[key] = ButtonObject(door_pos[key][0], door_pos[key][1], "D")
+
 for key in motion_pos:
     motion_pos[key] = ButtonObject(motion_pos[key][0], motion_pos[key][1], "M")
 for key in hotspot_pos:
     hotspot_pos[key] = ButtonObject(hotspot_pos[key][0], hotspot_pos[key][1], "W")
 
-Thomas = Person("T", 166, 100)
+
+
+Thomas = Person("Thomas", room_pos[110][0], room_pos[110][1])
 
 play_button = ButtonObject(870, 745, "Play", 20, 30)
+
+
+
 # update GUI elements
 while True:
+    # Updates the date & time tag and converts from epoch time
     date_format.set(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(date_var.get())))
+
     if not play_button.state:
         date_var.set(date_var.get() + 5)
 
     if date_var.get() == START_TIME + 5:
-        Thomas.move(None, 500, 500)
+        Thomas.move(236)
     try:
         window.update()
     except:
