@@ -191,10 +191,15 @@ room_pos = {
 # Most rooms have doors and phones
 phone_pos = door_pos.copy()
 
+phone_pos["lobby"] =  (344, 160)
+
 # Turn coordinates in dict to toggle buttons
 for key in door_pos:
-    phone_pos[key] = ButtonObject(door_pos[key][0] - 15, door_pos[key][1], "P")
+
     door_pos[key] = ButtonObject(door_pos[key][0], door_pos[key][1], "D")
+
+for key in phone_pos:
+    phone_pos[key] = ButtonObject(phone_pos[key][0] - 15, phone_pos[key][1], "P")
 
 for key in motion_pos:
     motion_pos[key] = ButtonObject(motion_pos[key][0], motion_pos[key][1], "M")
@@ -241,8 +246,14 @@ def trigger_event(database,current_time):
             if event[2] == "156b":
                 door_num = 156.5
             door = door_pos[int(door_num)]
-            if 
-            .invoke()
+            if door.color =="green" and event[3] == "door closed":
+                door.invoke()
+            if door.color =="red" and ( event[3] == "unlocked no keycard" or event[3] == "successful keycard unlock") :
+                door.invoke()
+        
+        elif event[1] == "phone":
+            
+            
     
     
     # if data[1] == "motion sensor":
