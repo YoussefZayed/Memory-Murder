@@ -8,7 +8,7 @@ Using the device data of the Hotel we were able to solve the murder and show the
 This project is written in python with the back end using sql to query the data
 sqlite3 for the database and tkinter was used for the GUI
 
-#Team
+# Team
 
 The team comprised of Youssef Zayed, Sean Kerr and Dhriti Arivand
 
