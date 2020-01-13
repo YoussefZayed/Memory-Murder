@@ -1,4 +1,5 @@
 #this file handles all the priliminary database importing and cleaning
+# Created by Youssef Zayed cuhacking 2020
 
 import sqlite3
 
