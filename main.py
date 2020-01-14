@@ -1,13 +1,6 @@
-#This script controls all the other scripts 
-# its the script to rule them all 
+#this script just runs floor_map_GUI.py
 
-from databaseBuilder import DatabaseBuilder
-from parjason import *
+import floor_map_GUI
 
-test = DatabaseBuilder()
-#print(test.dataReturnIf(["NAME"],[["integer"]], 0, "France"))
-# f = set_location('mdat.json')
-# test.deleteTable('h')
-# test.createTable('Murder', types())
-# test.insertTable('Murder', f)
-#test.createTable('Json_Data', f)
+floor_map_GUI()
+
